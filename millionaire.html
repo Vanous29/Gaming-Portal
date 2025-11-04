@@ -1,0 +1,1098 @@
+﻿<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Chcete být milionářem?</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #1f1c2c, #928dab);
+      color: #f0f0f0;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    h1 {
+      margin: 20px 0 10px;
+      font-weight: 700;
+      color: #00ffea;
+      text-shadow: 0 0 10px #00ffea;
+    }
+
+    #game-container {
+      background: rgba(20, 20, 30, 0.85);
+      padding: 20px 30px;
+      border-radius: 12px;
+      max-width: 600px;
+      width: 90vw;
+      box-shadow: 0 0 20px #00ffea66;
+    }
+
+    #question {
+      font-size: 1.2rem;
+      margin-bottom: 20px;
+      min-height: 70px;
+    }
+
+    #options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    button.option {
+      background: #333;
+      color: #eee;
+      border: 2px solid #00ffea;
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.3s, color 0.3s, transform 0.15s;
+      user-select: none;
+      box-shadow: 0 0 8px #00ffea33;
+    }
+    button.option:hover:not(:disabled) {
+      background: #00ffea;
+      color: #1a1a1a;
+      box-shadow: 0 0 15px #00ffea88;
+      transform: scale(1.05);
+    }
+    button.option:active:not(:disabled) {
+      transform: scale(0.98);
+      box-shadow: 0 0 10px #00ffeacc inset;
+    }
+    button.option:disabled {
+      background: #555;
+      border-color: #444;
+      color: #999;
+      cursor: default;
+      box-shadow: none;
+      transform: none;
+      visibility: visible;
+    }
+    button.option.correct {
+      background: #00c851;
+      border-color: #007e33;
+      color: white;
+      box-shadow: 0 0 20px #00c851cc;
+    }
+    button.option.wrong {
+      background: #ff4444;
+      border-color: #cc0000;
+      color: white;
+      box-shadow: 0 0 20px #ff4444cc;
+    }
+
+    #controls {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 15px;
+    }
+    button#next-btn,
+    button#restart-btn,
+    button#fifty-fifty,
+    button#ai-help {
+      background: #222;
+      border: 2px solid #ffd700;
+      border-radius: 8px;
+      color: #ffd700;
+      font-weight: 700;
+      padding: 10px 18px;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.3s, color 0.3s, transform 0.15s, box-shadow 0.3s;
+      box-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
+    }
+    button#next-btn:hover:not(:disabled),
+    button#restart-btn:hover:not(:disabled),
+    button#fifty-fifty:hover:not(.disabled) {
+      background: #ffd700;
+      color: #222;
+      box-shadow: 0 0 15px rgba(255, 215, 0, 0.8);
+      transform: scale(1.05);
+    }
+    button#next-btn:active:not(:disabled),
+    button#restart-btn:active:not(:disabled),
+    button#fifty-fifty:active:not(.disabled) {
+      transform: scale(0.95);
+      box-shadow: 0 0 10px rgba(255, 215, 0, 0.8) inset;
+    }
+    button#ai-help:hover:not(.disabled) {
+      background: #ffd700;
+      color: #222;
+      box-shadow: 0 0 15px rgba(255, 215, 0, 0.8);
+      transform: scale(1.05);
+    }
+    button#ai-help:active:not(.disabled) {
+      transform: scale(0.95);
+      box-shadow: 0 0 10px rgba(255, 215, 0, 0.8) inset;
+    }
+    button:disabled {
+      cursor: default;
+    }
+
+    /* Stavy tlačítek pro počet použití */
+    button.used-once {
+      border-color: #997a00 !important;
+      color: #ccaa00 !important;
+      box-shadow: 0 0 6px rgba(255, 215, 0, 0.4) !important;
+      background: #332200 !important;
+      cursor: pointer !important;
+      transform: none !important;
+    }
+
+    button.used-twice {
+      border-color: #555 !important;
+      color: #666 !important;
+      box-shadow: none !important;
+      background: #222 !important;
+      cursor: default !important;
+      transform: none !important;
+    }
+
+    #result {
+      font-size: 1.1rem;
+      min-height: 45px;
+      margin-bottom: 10px;
+      text-align: center;
+      min-height: 50px;
+    }
+
+    #prize-pyramid {
+      margin-top: 15px;
+      max-width: 200px;
+    }
+    #prize-pyramid ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      user-select: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: #bbb;
+    }
+    #prize-pyramid li {
+      padding: 5px 8px;
+      border-radius: 6px;
+      margin-bottom: 3px;
+      transition: background 0.3s, color 0.3s;
+      text-align: right;
+      cursor: default;
+    }
+    #prize-pyramid li.current {
+      background: #ffd700;
+      color: #111;
+      font-weight: 700;
+      box-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.7); }
+      50% { box-shadow: 0 0 15px 5px rgba(255, 215, 0, 0.9); }
+      100% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0); }
+    }
+    button.ai-hint {
+      border-color: #ffd700 !important;
+      color: #ffd700 !important;
+      font-weight: 700;
+    }
+
+    /* Kontejner pro oslavnou animaci */
+    #confetti-container {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 9999;
+    }
+    .confetti-piece {
+      position: absolute;
+      width: 10px;
+      height: 18px;
+      opacity: 0.9;
+      transform-origin: center;
+      will-change: transform, top, left;
+      border-radius: 2px;
+    }
+
+    /* Small avatar always visible in top-right corner */
+    #moderator-avatar-small {
+      position: fixed !important;
+      right: 20px !important;
+      top: 20px !important;
+      width: 120px !important;
+      height: 120px !important;
+      border-radius: 50%;
+      border: 4px solid #ffd700;
+      background: #2a2a3e;
+      box-shadow: 0 4px 20px rgba(255, 215, 0, 0.4);
+      z-index: 999 !important;
+      object-fit: cover;
+      background-size: cover;
+      background-position: center;
+      transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      pointer-events: auto;
+    }
+    
+    /* Hide small avatar when fullscreen is active */
+    #moderator-avatar-small.hidden {
+      opacity: 0 !important;
+      visibility: hidden !important;
+      pointer-events: none !important;
+      display: none !important;
+    }
+    #moderator {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      display: none;
+      visibility: hidden;
+      opacity: 0;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 30px;
+      pointer-events: none;
+      z-index: 10000;
+      background: rgba(0, 0, 0, 0);
+      transition: all 0.4s ease;
+    }
+    #moderator.active {
+      display: flex;
+      visibility: visible;
+      opacity: 1;
+      pointer-events: auto;
+      background: rgba(0, 0, 0, 0.9);
+    }
+    
+    #moderator-avatar {
+      width: 220px;
+      height: 220px;
+      border-radius: 50%;
+      display: block !important;
+      position: relative;
+      box-shadow: 0 15px 60px rgba(255, 215, 0, 0.5);
+      pointer-events: auto;
+      cursor: default;
+      user-select: none;
+      object-fit: cover;
+      border: 6px solid #ffd700;
+      background: #2a2a3e;
+      overflow: hidden;
+      flex-shrink: 0;
+      visibility: visible !important;
+      opacity: 1 !important;
+      animation: avatarZoomIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+    
+    @keyframes avatarZoomIn {
+      from {
+        transform: scale(0.5);
+        opacity: 0;
+      }
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+    #moderator-dialog {
+      background: rgba(0,0,0,0.95);
+      color: #fff;
+      border: 3px solid #ffd700;
+      padding: 24px 32px;
+      border-radius: 16px;
+      max-width: 450px;
+      pointer-events: auto;
+      display: none;
+      flex-direction: column;
+      gap: 16px;
+      box-shadow: 0 10px 60px rgba(255, 215, 0, 0.3);
+      text-align: center;
+      animation: dialogSlideUp 0.4s ease-out 0.3s both;
+    }
+    
+    @keyframes dialogSlideUp {
+      from {
+        transform: translateY(30px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+    
+    #moderator.active #moderator-dialog {
+      display: flex;
+    }
+    #moderator-dialog p { margin: 0; font-weight: 700; font-size: 1.3rem; }
+    #moderator-dialog .mod-buttons { display:flex; gap:10px; justify-content: flex-end; }
+    #moderator-dialog button { background:#ffd700; color:#222; border:none; padding:8px 14px; border-radius:8px; cursor:pointer; font-weight:700; font-size:1rem; transition: all 0.2s; }
+    #moderator-dialog button:hover { transform: scale(1.05); box-shadow: 0 4px 15px rgba(255,215,0,0.5); }
+    #moderator-dialog button.cancel { background:#444; color:#ddd; }
+    #moderator-dialog button.cancel:hover { background:#555; }
+  .blurred { opacity: 0.5; pointer-events: none; }
+
+    /* Back link styling */
+    .back-link {
+      display: inline-block;
+      margin-top: 20px;
+      color: #ffd700;
+      text-decoration: none;
+      font-size: 1.1rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+    .back-link:hover {
+      color: #fff;
+      text-shadow: 0 0 10px #ffd700;
+      transform: translateX(-5px);
+    }
+  </style>
+</head>
+<body>
+
+  <a href="og_gamezz_portal.html" class="back-link">← Zpět na portál</a>
+
+  <!-- Small moderator avatar always visible -->
+  <img id="moderator-avatar-small" src="images.jpg" title="Moderátor" alt="Moderátor" />
+
+  <h1>💰 Chcete být milionářem?</h1>
+
+  <div id="game-container">
+    <div id="question">Načítání otázek...</div>
+    <div id="options"></div>
+
+    <div id="controls">
+  <button id="fifty-fifty" title="Odstraní 2 špatné odpovědi">50/50 (3)</button>
+  <button id="ai-help" title="AI na telefonu - poradí s 100% pravděpodností">AI na telefonu (2)</button>
+      <button id="restart-btn" style="display:none;">Restartovat hru</button>
+    </div>
+
+    <div id="result"></div>
+
+    <div id="prize-pyramid">
+      <ul id="prize-list"></ul>
+    </div>
+
+    <div id="confetti-container" aria-hidden="true"></div>
+  </div>
+
+  <!-- Moderator fullscreen overlay -->
+  <div id="moderator">
+    <div id="moderator-avatar" title="Moderátor" style="background-image: url('images.jpg'); background-size: cover; background-position: center;">
+      <span style="display: none;">👨‍💼</span>
+    </div>
+    <div id="moderator-dialog" role="dialog" aria-modal="true">
+      <p id="moderator-text">Jsi si jistý? Chceš odpovědět?</p>
+      <div class="mod-buttons">
+        <button id="mod-cancel" class="cancel">Ne</button>
+        <button id="mod-confirm">Ano</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="coin-system.js"></script>
+  <script>
+    const prizeMoney = [
+      "10 🪙", "20 🪙", "30 🪙", "50 🪙", "75 🪙",
+      "100 🪙", "200 🪙", "300 🪙", "500 🪙", "750 🪙",
+      "1000 🪙", "1100 🪙", "1200 🪙", "1350 🪙", "1500 🪙"
+    ];
+
+  // Každá otázka nyní obsahuje pole "difficulty" (1=nejlehčí, 5=nejtěžší)
+    const allQuestionsPool = [
+      { question: "Co je hlavní město České republiky?", options: ["Brno", "Praha", "Ostrava", "Plzeň"], answer: 1, difficulty: 1 },
+      { question: "Kolik má Česko krajů?", options: ["10", "13", "14", "8"], answer: 2, difficulty: 1 },
+      { question: "Který prvek má chemickou značku O?", options: ["Zlato", "Kyslík", "Stříbro", "Zinek"], answer: 1, difficulty: 1 },
+      { question: "Kdo napsal 'Babičku'?", options: ["Čapek", "Hrabal", "Neruda", "Božena Němcová"], answer: 3, difficulty: 2 },
+      { question: "Jaký je největší kontinent podle rozlohy?", options: ["Afrika", "Asie", "Evropa", "Severní Amerika"], answer: 1, difficulty: 2 },
+      { question: "Kdo vynalezl telefon?", options: ["Edison", "Bell", "Tesla", "Marconi"], answer: 1, difficulty: 2 },
+      { question: "Jaký je nejrychlejší suchozemský savec?", options: ["Lev", "Gepard", "Tygr", "Hyena"], answer: 1, difficulty: 2 },
+      { question: "Co je hlavní složkou vzduchu?", options: ["Kyslík", "Dusík", "Argon", "Oxid uhličitý"], answer: 1, difficulty: 2 },
+      { question: "Jak se jmenuje nejvyšší hora světa?", options: ["K2", "Everest", "Kangchenjunga", "Lhotse"], answer: 1, difficulty: 2 },
+      { question: "Který jazyk je oficiální v Brazílii?", options: ["Španělština", "Portugalština", "Francouzština", "Angličtina"], answer: 1, difficulty: 2 },
+      { question: "Kdo napsal 'Romeo a Julie'?, text", options: ["Shakespeare", "Goethe", "Molière", "Dante"], answer: 0, difficulty: 3 },
+      { question: "Co znamená zkratka WWW?", options: ["World Wide Web", "World Wide Word", "Wide World Web", "Web World Wide"], answer: 0, difficulty: 2 },
+      { question: "Který organ pumpuje krev v lidském těle?", options: ["Játra", "Plíce", "Srdce", "Ledviny"], answer: 2, difficulty: 2 },
+      { question: "Jaký je největší oceán?", options: ["Atlantský", "Indický", "Tichý", "Severní ledový"], answer: 2, difficulty: 2 },
+      // Přidám větší množství dalších otázek s různou obtížností
+      { question: "Kdy skončila druhá světová válka?", options: ["1940", "1945", "1950", "1939"], answer: 1, difficulty: 3 },
+      { question: "Který český vědec objevil periodickou tabulku?", options: ["Mendel", "Seznam", "Neumann", "Dobrovský"], answer: 0, difficulty: 3 },
+      { question: "Jak se jmenuje proces, při kterém rostliny přeměňují sluneční světlo na energii?", options: ["Fotosyntéza", "Respirace", "Glykolýza", "Transpirace"], answer: 0, difficulty: 2 },
+      { question: "Co je derivace v matematice?", options: ["Integrace", "Změna funkce", "Limitní hodnota", "Rychlost změny"], answer: 3, difficulty: 4 },
+      { question: "Který rok byla zavedena česká koruna?", options: ["1993", "1990", "2000", "1989"], answer: 0, difficulty: 3 },
+      { question: "Kdo napsal 'Proces'?", options: ["Kafka", "Havel", "Čapek", "Palacký"], answer: 0, difficulty: 4 },
+      { question: "Jaký je Newtonův druhý zákon?", options: ["F=ma", "E=mc2", "a=F/m", "p=mv"], answer: 0, difficulty: 4 },
+      { question: "Co je to kvantová superpozice?", options: ["Dva stavy současně", "Jeden stav", "Žádné stavy", "Neurčitost"], answer: 0, difficulty: 5 },
+      { question: "Kdo složil symfonii č. 9?", options: ["Mozart", "Beethoven", "Bach", "Dvořák"], answer: 1, difficulty: 3 },
+      { question: "Jaká je chemická značka pro zlato?", options: ["Ag", "Au", "Gd", "Zn"], answer: 1, difficulty: 2 },
+      { question: "Který strom je nejvyšší?", options: ["Sekvoj", "Borovice", "Dub", "Jasan"], answer: 0, difficulty: 3 },
+      { question: "Co znamená BIOS v počítači?", options: ["Basic Input Output System", "Binary Input Output System", "Basic Internal Operating System", "Binary Internal Operating System"], answer: 0, difficulty: 3 },
+      { question: "Který stát má největší rozlohu?", options: ["Kanada", "Rusko", "Čína", "USA"], answer: 1, difficulty: 3 },
+      { question: "Co je to GDP?", options: ["Hrubý domácí produkt", "Hrubý domácí příjem", "Národní dluh", "Inflace"], answer: 0, difficulty: 3 },
+      { question: "Kdo objevil penicilin?", options: ["Fleming", "Pasteur", "Curie", "Ehrlich"], answer: 0, difficulty: 3 },
+      { question: "Co je to HTML?", options: ["Jazyk pro strukturování webu", "Programovací jazyk", "Databáze", "Protokol"], answer: 0, difficulty: 2 },
+      { question: "Jaká je velikost planety Země přibližně?", options: ["4 000 km", "12 742 km", "40 000 km", "1 000 km"], answer: 1, difficulty: 2 },
+      // --- další otázky (rozšíření poolu) ---
+      { question: "Které zvíře je sudokopytník?", options: ["Pes", "Kůň", "Kočka", "Pták"], answer: 1, difficulty: 1 },
+      { question: "Kolik má člověk prstů na jedné ruce?", options: ["4", "5", "6", "7"], answer: 1, difficulty: 1 },
+      { question: "Jaký je symbol pro vodík?", options: ["H", "O", "He", "Hy"], answer: 0, difficulty: 1 },
+      { question: "Které město je známé jako ‚město světel'?", options: ["Paříž", "Londýn", "Praha", "Řím"], answer: 0, difficulty: 2 },
+      { question: "Kdo napsal 'Malého prince'?", options: ["Saint-Exupéry", "Hemingway", "Orwell", "Tolkien"], answer: 0, difficulty: 2 },
+      { question: "Jaká je základní jednotka elektrického proudu?", options: ["Volt", "Ohm", "Ampér", "Watt"], answer: 2, difficulty: 2 },
+      { question: "Kdo byl prvním prezidentem USA?", options: ["Abraham Lincoln", "George Washington", "John Adams", "Thomas Jefferson"], answer: 1, difficulty: 3 },
+      { question: "Co měří Richterova stupnice?", options: ["Rychlost větru", "Zemětřesení", "Teplotu", "Tlak"], answer: 1, difficulty: 2 },
+      { question: "Který z těchto prvků je alkalický kov?", options: ["Křemík", "Sodík", "Železo", "Uhlík"], answer: 1, difficulty: 3 },
+      { question: "Kdo napsal '1984'?", options: ["Aldous Huxley", "George Orwell", "Ray Bradbury", "Philip K. Dick"], answer: 1, difficulty: 3 },
+      { question: "Jak se nazývá proces, při kterém voda mění skupenství z kapalného na plynné?", options: ["Tání", "Sublimace", "Vypařování", "Kondenzační"], answer: 2, difficulty: 2 },
+      { question: "Kdo složil operu 'Don Giovanni'?", options: ["Mozart", "Beethoven", "Verdi", "Wagner"], answer: 0, difficulty: 4 },
+      { question: "Jaká je hodnota pí (přibližně)?", options: ["2.14", "3.14", "4.14", "1.41"], answer: 1, difficulty: 2 },
+      { question: "Který orgán produkuje inzulín?", options: ["Játra", "Slinivka břišní", "Žaludek", "Ledviny"], answer: 1, difficulty: 3 },
+      { question: "Jak se jmenuje nejdelší řeka světa?", options: ["Amazonka", "Nil", "Yangtze", "Mississippi"], answer: 0, difficulty: 3 },
+      { question: "Který plyn je nejrozšířenější v atmosféře Země?", options: ["Kyslík", "Dusík", "Argon", "Oxid uhličitý"], answer: 1, difficulty: 1 },
+      { question: "Co je to fotosyntéza?", options: ["Tvorba světla", "Přeměna světla na energii", "Dýchání", "Mineralizace"], answer: 1, difficulty: 2 },
+      
+      // DIFFICULTY 1 - Velmi lehké otázky (celkem 60+)
+      { question: "Kolik hodin má den?", options: ["12", "24", "48", "36"], answer: 1, difficulty: 1 },
+      { question: "Jakou barvu má čistá voda?", options: ["Modrá", "Zelená", "Průhledná", "Bílá"], answer: 2, difficulty: 1 },
+      { question: "Kolik noh má pavouk?", options: ["6", "8", "10", "4"], answer: 1, difficulty: 1 },
+      { question: "Kolik dnů má týden?", options: ["5", "6", "7", "8"], answer: 2, difficulty: 1 },
+      { question: "Co je slunce?", options: ["Planeta", "Hvězda", "Měsíc", "Kometa"], answer: 1, difficulty: 1 },
+      { question: "Jaké je hlavní město Francie?", options: ["Lyon", "Marseille", "Paříž", "Nice"], answer: 2, difficulty: 1 },
+      { question: "Kolik světadílů má Země?", options: ["5", "6", "7", "8"], answer: 2, difficulty: 1 },
+      { question: "Který orgán čichá?", options: ["Oči", "Nos", "Uši", "Jazyk"], answer: 1, difficulty: 1 },
+      { question: "Co je 2 + 2?", options: ["3", "4", "5", "6"], answer: 1, difficulty: 1 },
+      { question: "Jaké zvíře říká 'mňau'?", options: ["Pes", "Kočka", "Kráva", "Ovce"], answer: 1, difficulty: 1 },
+      { question: "Kolik má člověk očí?", options: ["1", "2", "3", "4"], answer: 1, difficulty: 1 },
+      { question: "Co je z toho ovoce?", options: ["Mrkev", "Jablko", "Brambor", "Cibule"], answer: 1, difficulty: 1 },
+      { question: "Jakou barvu má tráva?", options: ["Červená", "Modrá", "Zelená", "Žlutá"], answer: 2, difficulty: 1 },
+      { question: "Kolik má trojúhelník stran?", options: ["2", "3", "4", "5"], answer: 1, difficulty: 1 },
+      { question: "Které roční období přichází po létě?", options: ["Jaro", "Zima", "Podzim", "Léto"], answer: 2, difficulty: 1 },
+      { question: "Co potřebujeme k dýchání?", options: ["Vodu", "Kyslík", "Jídlo", "Světlo"], answer: 1, difficulty: 1 },
+      { question: "Jaké je hlavní město Slovenska?", options: ["Brno", "Bratislava", "Praha", "Košice"], answer: 1, difficulty: 1 },
+      { question: "Kolik má čtverec rohů?", options: ["3", "4", "5", "6"], answer: 1, difficulty: 1 },
+      { question: "Co svítí na obloze v noci?", options: ["Slunce", "Měsíc", "Lampa", "Svíčka"], answer: 1, difficulty: 1 },
+      
+      // DIFFICULTY 2 - Lehké otázky (celkem 60+)
+      { question: "Kdo napsal Kocoura v botách?", options: ["Andersen", "Perrault", "Grimm", "Čapek"], answer: 1, difficulty: 2 },
+      { question: "Jaká je chemická značka pro vodu?", options: ["H2O", "CO2", "O2", "H2"], answer: 0, difficulty: 2 },
+      { question: "Kolik nohou má včela?", options: ["4", "6", "8", "10"], answer: 1, difficulty: 2 },
+      { question: "Ve kterém roce padla Berlínská zeď?", options: ["1985", "1987", "1989", "1991"], answer: 2, difficulty: 2 },
+      { question: "Jak se jmenuje první člověk ve vesmíru?", options: ["Armstrong", "Gagarin", "Aldrin", "Glenn"], answer: 1, difficulty: 2 },
+      { question: "Kolik kláves má standardní klavír?", options: ["66", "77", "88", "99"], answer: 2, difficulty: 2 },
+      { question: "Který oceán je mezi Evropou a Amerikou?", options: ["Tichý", "Atlantský", "Indický", "Severní ledový"], answer: 1, difficulty: 2 },
+      { question: "Kolik je 5 × 5?", options: ["20", "25", "30", "35"], answer: 1, difficulty: 2 },
+      { question: "Jak se nazývá studium hvězd?", options: ["Astrologie", "Astronomie", "Geologie", "Biologie"], answer: 1, difficulty: 2 },
+      { question: "Jaká je státní měna Velké Británie?", options: ["Euro", "Libra", "Dolar", "Frank"], answer: 1, difficulty: 2 },
+      { question: "Kolik měsíců má 31 dní?", options: ["5", "6", "7", "8"], answer: 2, difficulty: 2 },
+      { question: "Která řeka protéká Prahou?", options: ["Labe", "Vltava", "Morava", "Odra"], answer: 1, difficulty: 2 },
+      { question: "Co je hlavní náboženství v Indii?", options: ["Buddhismus", "Hinduismus", "Islám", "Křesťanství"], answer: 1, difficulty: 2 },
+      { question: "Kolik strun má kytara?", options: ["4", "5", "6", "7"], answer: 2, difficulty: 2 },
+      { question: "V jakém roce začala první světová válka?", options: ["1912", "1914", "1916", "1918"], answer: 1, difficulty: 2 },
+      
+      // DIFFICULTY 3 - Střední obtížnost (celkem 50+)
+      { question: "Kdo napsal Odysseu?", options: ["Homér", "Vergiliús", "Sofokles", "Platon"], answer: 0, difficulty: 3 },
+      { question: "Který prvek má atomové číslo 1?", options: ["Helium", "Vodík", "Kyslík", "Uhlík"], answer: 1, difficulty: 3 },
+      { question: "Kolik kostí má dospělý člověk?", options: ["186", "206", "226", "246"], answer: 1, difficulty: 3 },
+      { question: "Jaké je hlavní město Austrálie?", options: ["Sydney", "Melbourne", "Canberra", "Brisbane"], answer: 2, difficulty: 3 },
+      { question: "Kdo maloval Monu Lisu?", options: ["Michelangelo", "Da Vinci", "Raphael", "Donatello"], answer: 1, difficulty: 3 },
+      { question: "Kolik elementů je v periodické tabulce?", options: ["92", "103", "118", "125"], answer: 2, difficulty: 3 },
+      { question: "Která planeta je nejblíže ke Slunci?", options: ["Venuše", "Merkur", "Mars", "Země"], answer: 1, difficulty: 3 },
+      { question: "Kdo složil Čtyři roční období?", options: ["Bach", "Vivaldi", "Mozart", "Händel"], answer: 1, difficulty: 3 },
+      { question: "Jaký je největší nebeský útes (asteroid)?", options: ["Vesta", "Ceres", "Pallas", "Hygiea"], answer: 1, difficulty: 3 },
+      { question: "Ve kterém roce se konala Bitva u Waterloo?", options: ["1805", "1812", "1815", "1821"], answer: 2, difficulty: 3 },
+      { question: "Kolik chromosomů má člověk?", options: ["23", "44", "46", "48"], answer: 2, difficulty: 3 },
+      { question: "Která řeka je nejdelší v Evropě?", options: ["Dunaj", "Rýn", "Volga", "Dněpr"], answer: 2, difficulty: 3 },
+      { question: "Kdo objevil radioaktivitu?", options: ["Curie", "Einstein", "Becquerel", "Röntgen"], answer: 2, difficulty: 3 },
+      { question: "Který orgán produkuje žluč?", options: ["Slinivka", "Játra", "Ledviny", "Slezina"], answer: 1, difficulty: 3 },
+      { question: "V jakém roce vznikla OSN?", options: ["1942", "1945", "1948", "1950"], answer: 1, difficulty: 3 },
+      
+      // DIFFICULTY 4 - Těžké otázky (celkem 40+)
+      { question: "Jaká je rychlost světla ve vakuu?", options: ["299 792 km/s", "300 000 km/s", "299 792 458 m/s", "3×10⁸ m/s"], answer: 2, difficulty: 4 },
+      { question: "Kdo napsal Kritiku čistého rozumu?", options: ["Hegel", "Kant", "Nietzsche", "Descartes"], answer: 1, difficulty: 4 },
+      { question: "Kolik je Avogadrovo číslo?", options: ["6.02×10²³", "6.02×10²⁴", "3.14×10²³", "1.60×10⁻¹⁹"], answer: 0, difficulty: 4 },
+      { question: "Který jazyk se mluví v Bangladéši?", options: ["Hindi", "Bengálština", "Urdština", "Paštština"], answer: 1, difficulty: 4 },
+      { question: "Kdo byl první ženou, která získala Nobelovu cenu?", options: ["Marie Curie", "Rosalind Franklin", "Ada Lovelace", "Emmy Noether"], answer: 0, difficulty: 4 },
+      { question: "Jaký je poločas rozpadu uhlíku-14?", options: ["5 730 let", "11 460 let", "2 865 let", "1 600 let"], answer: 0, difficulty: 4 },
+      { question: "Kdo vynalezl dynamit?", options: ["Edison", "Tesla", "Nobel", "Watt"], answer: 2, difficulty: 4 },
+      { question: "Který z těchto prvků je vzácný zemní kov?", options: ["Wolfram", "Cer", "Kobalt", "Vanad"], answer: 1, difficulty: 4 },
+      { question: "Jaký je vzorec pro kyselinu sírovou?", options: ["HCl", "H2SO4", "HNO3", "H3PO4"], answer: 1, difficulty: 4 },
+      { question: "Ve kterém roce byla podepsána Magna Carta?", options: ["1066", "1215", "1348", "1492"], answer: 1, difficulty: 4 },
+      { question: "Kdo objevil strukturu DNA?", options: ["Watson a Crick", "Mendel", "Darwin", "Pasteur"], answer: 0, difficulty: 4 },
+      { question: "Jaká je hustota vody při 4°C?", options: ["0.998 g/cm³", "1.000 g/cm³", "1.002 g/cm³", "0.996 g/cm³"], answer: 1, difficulty: 4 },
+      { question: "Který filosof napsal Symposion?", options: ["Aristoteles", "Platón", "Sokrates", "Epikúros"], answer: 1, difficulty: 4 },
+      { question: "Kolik amino kyselin je esenciálních pro člověka?", options: ["8", "9", "10", "12"], answer: 1, difficulty: 4 },
+      
+      // DIFFICULTY 5 - Velmi těžké otázky (celkem 30+)
+      { question: "Jaký je Planckův konstantní?", options: ["6.626×10⁻³⁴ J·s", "6.626×10⁻³³ J·s", "1.380×10⁻²³ J/K", "9.109×10⁻³¹ kg"], answer: 0, difficulty: 5 },
+      { question: "Kdo dokázal Fermatovu velkou větu?", options: ["Wiles", "Euler", "Gauss", "Riemann"], answer: 0, difficulty: 5 },
+      { question: "Jaký je třetí zákon termodynamiky?", options: ["Entropie je vždy nula", "Entropie dokonalého krystalu při 0K je nula", "Energie se zachovává", "Entropie vždy roste"], answer: 1, difficulty: 5 },
+      { question: "Který izotop se používá pro určování stáří archeologických nálezů?", options: ["Uhlík-12", "Uhlík-13", "Uhlík-14", "Uhlík-15"], answer: 2, difficulty: 5 },
+      { question: "Kdo formuloval teorii obecné relativity?", options: ["Newton", "Einstein", "Hawking", "Feynman"], answer: 1, difficulty: 5 },
+      { question: "Jaká je hmotnost elektronu?", options: ["9.109×10⁻³¹ kg", "1.673×10⁻²⁷ kg", "1.675×10⁻²⁷ kg", "6.626×10⁻³⁴ kg"], answer: 0, difficulty: 5 },
+      { question: "Která částice byla objevena v CERNu v roce 2012?", options: ["Top kvark", "Higgsův boson", "Neutríno", "Graviton"], answer: 1, difficulty: 5 },
+      { question: "Kolik je Riemannova hypotéza dokázána?", options: ["Ano", "Ne", "Částečně", "Vyvrácena"], answer: 1, difficulty: 5 },
+      { question: "Jaký je šestý prvek periodické tabulky?", options: ["Dusík", "Kyslík", "Uhlík", "Bor"], answer: 2, difficulty: 5 },
+      { question: "Kdo vytvořil kvantovou elektrodynamiku?", options: ["Bohr", "Schrödinger", "Feynman", "Heisenberg"], answer: 2, difficulty: 5 },
+      { question: "Jaká je Eulerova identita?", options: ["e^(iπ) + 1 = 0", "e^(iπ) = 1", "e^π = i", "e^i = π"], answer: 0, difficulty: 5 },
+      { question: "Kolik dimenzí má teorie strun?", options: ["4", "10", "11", "26"], answer: 2, difficulty: 5 },
+      { question: "Která konstanta určuje sílu elektromagnetické interakce?", options: ["Planckova", "Bohrův poloměr", "Jemná struktura", "Hubbleova"], answer: 2, difficulty: 5 },
+      { question: "Kdo objevil neutron?", options: ["Rutherford", "Chadwick", "Thomson", "Bohr"], answer: 1, difficulty: 5 },
+      { question: "Jaký je poločas rozpadu uranu-238?", options: ["704 milionů let", "4.468 miliard let", "24 000 let", "1600 let"], answer: 1, difficulty: 5 },
+    ];
+
+    // Při načtení přiřadíme každé otázce stabilní ID (index v poli) pro sledování použití
+    allQuestionsPool.forEach((q, i) => { if (q.id === undefined) q.id = i; });
+
+    // Použité otázky uložíme v localStorage, abychom se vyhnuli opakování mezi hrami
+    const USED_QUESTIONS_KEY = 'millionaire_used_question_ids_v1';
+    function loadUsedQuestionIds() {
+      try {
+        const raw = localStorage.getItem(USED_QUESTIONS_KEY);
+        return raw ? JSON.parse(raw) : [];
+      } catch (e) { return []; }
+    }
+    function saveUsedQuestionIds(arr) { try { localStorage.setItem(USED_QUESTIONS_KEY, JSON.stringify(arr)); } catch(e){} }
+
+    function clearUsedQuestionIds() { try { localStorage.removeItem(USED_QUESTIONS_KEY); } catch(e){} }
+
+    let usedQuestionIds = loadUsedQuestionIds();
+
+    let questions = [];
+    let currentQuestionIndex = 0;
+
+  // Pomocné počty použití
+  let fiftyFiftyUsesLeft = 3; // 50/50 dostupné třikrát
+  let aiHelpUsesLeft = 2; // AI dostupné dvakrát a bude 100% správné
+
+  // Auto-advance to next question after correct answer
+  const AUTO_ADVANCE_MS = 2000; // 2s
+  let autoAdvanceTimer = null;
+
+    const questionEl = document.getElementById('question');
+    const optionsEl = document.getElementById('options');
+    const restartBtn = document.getElementById('restart-btn');
+    const fiftyFiftyBtn = document.getElementById('fifty-fifty');
+    const aiHelpBtn = document.getElementById('ai-help');
+    const resultEl = document.getElementById('result');
+    const prizeListEl = document.getElementById('prize-list');
+
+    function shuffleArray(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    // buildQuestionSet: vytvoří sadu "count" otázek, která postupně roste v obtížnosti
+    function buildQuestionSet(pool, count) {
+      // Preferujeme otázky, které ještě nebyly použity (stored in usedQuestionIds)
+      let availablePool = pool.filter(q => !usedQuestionIds.includes(q.id));
+
+      // Pokud není dostatek nepoužitých otázek, resetneme použití (nebo použijeme všechny dostupné)
+      if (availablePool.length < count) {
+        // pokud chceme, můžeme místo resetu použít kombinaci - pro jednoduchost resetneme
+        usedQuestionIds = [];
+        saveUsedQuestionIds(usedQuestionIds);
+        availablePool = [...pool];
+      }
+
+      // dál pracujeme s availablePool
+      const poolToUse = availablePool;
+
+      // Rozdělíme otázky podle difficulty
+      // Rozdělíme otázky podle difficulty
+      const buckets = {};
+      poolToUse.forEach(q => {
+        const d = q.difficulty || 1;
+        if (!buckets[d]) buckets[d] = [];
+        buckets[d].push(q);
+      });
+
+      // Pořadí obtížností (1..5)
+      const minD = 1;
+      const maxD = 5;
+
+      // Počty otázek pro difficulty 1..5 (součet by měl být count)
+      // Např. pro 15 otázek: [5,4,3,2,1] => lehčí na začátku, těžší na konci
+      const distribution = [5, 4, 3, 2, 1];
+      // Pokud se liší délka, normalizujeme (roztáhneme nebo ořízneme)
+      if (distribution.reduce((a,b)=>a+b,0) !== count) {
+        // jednoduché rozdělení: rovnoměrně rozdělíme
+        const base = Math.floor(count / (maxD - minD + 1));
+        let rem = count - base * (maxD - minD + 1);
+        for (let d = minD; d <= maxD; d++) {
+          distribution[d-1] = base + (rem > 0 ? 1 : 0);
+          rem--;
+        }
+      }
+
+      const result = [];
+
+      // Pro každou obtížnost od nejlehčí po nejtěžší vybereme požadovaný počet otázek (náhodně z bucketu)
+      for (let d = minD; d <= maxD; d++) {
+        let need = distribution[d-1] || 0;
+        // Pokud není bucket, nebo je prázdný, naplníme později
+        if (!buckets[d]) buckets[d] = [];
+        shuffleArray(buckets[d]);
+        while (need > 0 && buckets[d].length > 0) {
+          result.push(buckets[d].pop());
+          need--;
+        }
+
+        // Pokud stále potřebujeme, získáme z nejbližších dostupných buckets
+        while (need > 0) {
+          // hledáme nejbližší difficulty s dostupnými otázkami
+          let found = false;
+          for (let offset = 1; offset <= Math.max(d-1, maxD-d); offset++) {
+            const low = d - offset;
+            const high = d + offset;
+            if (low >= minD && buckets[low] && buckets[low].length > 0) {
+              result.push(buckets[low].pop());
+              found = true;
+              break;
+            }
+            if (high <= maxD && buckets[high] && buckets[high].length > 0) {
+              result.push(buckets[high].pop());
+              found = true;
+              break;
+            }
+          }
+          if (!found) break; // nic už není k dispozici
+          need--;
+        }
+      }
+
+  // Pokud jsme nenaplnili count, doplníme zbývajícími otázkami z poolToUse (ostatní)
+  const remaining = poolToUse.filter(p => !result.includes(p));
+      shuffleArray(remaining);
+      while (result.length < count && remaining.length) result.push(remaining.pop());
+
+      // Zajistíme, že otázky budou ve výsledku seřazeny od nejlehčí po nejtěžší
+      result.sort((a,b) => (a.difficulty || 1) - (b.difficulty || 1));
+
+      // Pokud existují otázky stejné difficulty, zamícháme jejich pořadí pro větší variabilitu
+      // (ale stále zachováme skupiny difficulty ve vzrůstajícím pořadí)
+      const final = [];
+      let i = 0;
+      while (i < result.length) {
+        const d = result[i].difficulty || 1;
+        const group = [];
+        while (i < result.length && (result[i].difficulty || 1) === d) {
+          group.push(result[i]);
+          i++;
+        }
+        shuffleArray(group);
+        final.push(...group);
+      }
+
+      // Označíme vybrané otázky jako použité
+      final.slice(0, count).forEach(q => {
+        if (!usedQuestionIds.includes(q.id)) usedQuestionIds.push(q.id);
+      });
+      saveUsedQuestionIds(usedQuestionIds);
+
+      return final.slice(0, count);
+    }
+
+    function startGame() {
+  currentQuestionIndex = 0;
+  fiftyFiftyUsesLeft = 3;
+  aiHelpUsesLeft = 2;
+  
+  // Reset coinů na začátku hry (aby se nesčítaly mezi hrami)
+  if (typeof window.millionaireCoinsEarned === 'undefined') {
+    window.millionaireCoinsEarned = 0;
+  }
+
+      updateHelpButtons();
+
+      restartBtn.style.display = 'none';
+      resultEl.textContent = '';
+
+  // Vytvoříme sadu 15 otázek, které se náhodně vyberou, ale budou postupně ztěžovat
+  questions = buildQuestionSet(allQuestionsPool, 15);
+
+      renderPrizePyramid();
+      showQuestion();
+    }
+
+    function updateHelpButtons() {
+      // Aktualizuje tlačítka podle zbývajících použití
+
+      // 50/50 tlačítko
+      if (fiftyFiftyUsesLeft === 3) {
+        fiftyFiftyBtn.disabled = false;
+        fiftyFiftyBtn.classList.remove('used-once', 'used-twice');
+        fiftyFiftyBtn.textContent = `50/50 (${fiftyFiftyUsesLeft})`;
+      } else if (fiftyFiftyUsesLeft === 2) {
+        fiftyFiftyBtn.disabled = false;
+        fiftyFiftyBtn.classList.add('used-once');
+        fiftyFiftyBtn.classList.remove('used-twice');
+        fiftyFiftyBtn.textContent = `50/50 (${fiftyFiftyUsesLeft})`;
+      } else if (fiftyFiftyUsesLeft === 1) {
+        fiftyFiftyBtn.disabled = false;
+        fiftyFiftyBtn.classList.add('used-once');
+        fiftyFiftyBtn.classList.remove('used-twice');
+        fiftyFiftyBtn.textContent = `50/50 (${fiftyFiftyUsesLeft})`;
+      } else {
+        fiftyFiftyBtn.disabled = true;
+        fiftyFiftyBtn.classList.remove('used-once');
+        fiftyFiftyBtn.classList.add('used-twice');
+        fiftyFiftyBtn.textContent = `50/50 (0)`;
+      }
+
+      // AI pomoc tlačítko (nyní 2 použití a 100% správnost)
+      if (aiHelpUsesLeft === 2) {
+        aiHelpBtn.disabled = false;
+        aiHelpBtn.classList.remove('used-once', 'used-twice');
+        aiHelpBtn.textContent = `AI na telefonu (${aiHelpUsesLeft})`;
+      } else if (aiHelpUsesLeft === 1) {
+        aiHelpBtn.disabled = false;
+        aiHelpBtn.classList.add('used-once');
+        aiHelpBtn.classList.remove('used-twice');
+        aiHelpBtn.textContent = `AI na telefonu (${aiHelpUsesLeft})`;
+      } else {
+        aiHelpBtn.disabled = true;
+        aiHelpBtn.classList.remove('used-once');
+        aiHelpBtn.classList.add('used-twice');
+        aiHelpBtn.textContent = `AI na telefonu (0)`;
+      }
+    }
+
+    function renderPrizePyramid() {
+      prizeListEl.innerHTML = '';
+      for (let i = prizeMoney.length - 1; i >= 0; i--) {
+        const li = document.createElement('li');
+        li.textContent = `${i + 1}. ${prizeMoney[i]}`;
+        if (i === currentQuestionIndex) li.classList.add('current');
+        prizeListEl.appendChild(li);
+      }
+    }
+
+    function showQuestion() {
+      // cancel any pending auto-advance when rendering a new question
+      if (autoAdvanceTimer) { try { clearTimeout(autoAdvanceTimer); } catch(e){} autoAdvanceTimer = null; }
+      const q = questions[currentQuestionIndex];
+      questionEl.textContent = q.question;
+      optionsEl.innerHTML = '';
+
+      // Zobrazíme odpovědi v náhodném pořadí, aby správná odpověď nebyla na stejném místě
+      const indices = q.options.map((_, i) => i);
+      shuffleArray(indices);
+      indices.forEach(origIndex => {
+        const btn = document.createElement('button');
+        btn.textContent = q.options[origIndex];
+        btn.classList.add('option');
+        btn.disabled = false;
+        btn.dataset.idx = origIndex; // uložíme původní index odpovědi
+        // místo okamžitého volání selectAnswer zobrazíme potvrzovací dialog moderátora
+        btn.addEventListener('click', (e) => {
+          openModeratorConfirm(origIndex, btn);
+        });
+        optionsEl.appendChild(btn);
+      });
+
+      restartBtn.style.display = 'none';
+      resultEl.textContent = '';
+
+      updateHelpButtons();
+    }
+
+    function selectAnswer(selectedOriginalIndex) {
+      const q = questions[currentQuestionIndex];
+      const buttons = optionsEl.querySelectorAll('button.option');
+
+      buttons.forEach((btn) => {
+        btn.disabled = true;
+        const orig = Number(btn.dataset.idx);
+        if (orig === q.answer) {
+          btn.classList.add('correct');
+        } else if (orig === selectedOriginalIndex) {
+          btn.classList.add('wrong');
+        }
+      });
+
+      if (selectedOriginalIndex === q.answer) {
+        // Vypočítej coiny za aktuální otázku
+        const coinsForQuestion = [10, 20, 30, 50, 75, 100, 200, 300, 500, 750, 1000, 1100, 1200, 1350, 1500];
+        const currentLevelCoins = coinsForQuestion[currentQuestionIndex];
+        
+        // Odeber předchozí coiny a přidej nové (aby se nesčítaly)
+        if (currentQuestionIndex > 0 && typeof CoinSystem !== 'undefined') {
+          const previousCoins = coinsForQuestion[currentQuestionIndex - 1];
+          CoinSystem.addCoins(currentLevelCoins - previousCoins);
+        } else if (currentQuestionIndex === 0 && typeof CoinSystem !== 'undefined') {
+          // První otázka - přidej pouze aktuální coiny
+          CoinSystem.addCoins(currentLevelCoins);
+        }
+        
+        resultEl.textContent = `Správně! Vyhráváš ${prizeMoney[currentQuestionIndex]}`;
+        currentQuestionIndex++;
+        if (currentQuestionIndex >= questions.length) {
+          resultEl.textContent += " - Gratulujeme, vyhrál(a) jsi hlavní cenu!";
+          restartBtn.style.display = 'inline-block';
+          // spustíme oslavnou animaci
+          showWinAnimation();
+        } else {
+          // Automaticky načteme další otázku po 1.5 sekundách
+          setTimeout(() => {
+            showQuestion();
+          }, 1500);
+        }
+      } else {
+        resultEl.textContent = `Špatně! Správná odpověď byla: ${q.options[q.answer]}. Vyhráváš ${currentQuestionIndex > 0 ? prizeMoney[currentQuestionIndex - 1] : "0 🪙"}.`;
+        restartBtn.style.display = 'inline-block';
+      }
+
+      // Po odpovědi se tlačítka pomoci deaktivují na zbytek kola
+      fiftyFiftyBtn.disabled = true;
+      aiHelpBtn.disabled = true;
+
+      renderPrizePyramid();
+    }
+
+    fiftyFiftyBtn.addEventListener('click', () => {
+      if (fiftyFiftyUsesLeft <= 0) return;
+
+      fiftyFiftyUsesLeft--;
+      updateHelpButtons();
+
+      const q = questions[currentQuestionIndex];
+      const buttons = Array.from(optionsEl.querySelectorAll('button.option'));
+
+      // Najdeme zobrazené/aktivní tlačítka
+      const visibleButtons = buttons.filter(b => b.style.visibility !== 'hidden');
+
+      // Najdeme tlačítko s korektní odpovědí (podle data-idx)
+      let correctBtn = visibleButtons.find(b => Number(b.dataset.idx) === q.answer && !b.disabled);
+      // fallback: pokud není mezi visible, hledej mezi všemi
+      if (!correctBtn) correctBtn = buttons.find(b => Number(b.dataset.idx) === q.answer);
+
+      // Seznam špatných tlačítek (které můžeme skrýt)
+      let wrongBtns = buttons.filter(b => Number(b.dataset.idx) !== q.answer && !b.disabled && b.style.visibility !== 'hidden');
+
+      // Pokud nejsou žádné špatné viditelné (běžně ne), umožníme nic nedělat
+      if (wrongBtns.length === 0) {
+        // Deaktivujeme 50/50 jen pro tuto otázku
+        fiftyFiftyBtn.disabled = true;
+        aiHelpBtn.disabled = false;
+        return;
+      }
+
+      // Vybereme si náhodně jedno špatné, které zůstane viditelné
+      shuffleArray(wrongBtns);
+      const keepWrong = wrongBtns[0];
+
+      // Skryjeme všechna tlačítka kromě correctBtn a keepWrong
+      buttons.forEach(b => {
+        if (b !== correctBtn && b !== keepWrong) {
+          b.disabled = true;
+          b.style.visibility = 'hidden';
+        }
+      });
+
+      // Ujistíme se, že correctBtn i keepWrong jsou viditelné a povolené
+      if (correctBtn) { correctBtn.disabled = false; correctBtn.style.visibility = 'visible'; }
+      if (keepWrong) { keepWrong.disabled = false; keepWrong.style.visibility = 'visible'; }
+
+      // Po použití pomoci už ji nelze znovu použít na aktuální otázku (ale může se použít znovu na další otázce)
+      fiftyFiftyBtn.disabled = true;
+      aiHelpBtn.disabled = false;
+    });
+
+    aiHelpBtn.addEventListener('click', () => {
+      if (aiHelpUsesLeft <= 0) return;
+
+      aiHelpUsesLeft--;
+      updateHelpButtons();
+
+      const q = questions[currentQuestionIndex];
+      const buttons = optionsEl.querySelectorAll('button.option');
+
+      // Najdeme zobrazené tlačítko, jehož původní index (data-idx) odpovídá správné odpovědi
+      const btnArray = Array.from(buttons);
+      let targetBtn = btnArray.find(b => Number(b.dataset.idx) === q.answer && !b.disabled && b.style.visibility !== 'hidden');
+      // fallback: najít jakékoli tlačítko se stejným data-idx
+      if (!targetBtn) targetBtn = btnArray.find(b => Number(b.dataset.idx) === q.answer && !b.disabled) || btnArray.find(b => Number(b.dataset.idx) === q.answer);
+
+      if (targetBtn) {
+        btnArray.forEach(btn => btn.classList.remove('ai-hint'));
+        targetBtn.classList.add('ai-hint');
+        targetBtn.style.animation = 'pulse 1.5s ease-in-out 3';
+
+        setTimeout(() => {
+          targetBtn.classList.remove('ai-hint');
+          targetBtn.style.animation = '';
+        }, 4500);
+      }
+
+      // Po použití pomoci už ji nelze znovu použít na aktuální otázku (ale může se použít znovu na další otázce)
+      aiHelpBtn.disabled = true;
+      fiftyFiftyBtn.disabled = false;
+    });
+
+    restartBtn.addEventListener('click', () => {
+      if (autoAdvanceTimer) { try { clearTimeout(autoAdvanceTimer); } catch(e){} autoAdvanceTimer = null; }
+      clearWinAnimation();
+      startGame();
+    });
+
+    // Start hry při načtení stránky
+    startGame();
+
+    // Oslavná animace - jednoduché confetti
+    const confettiContainer = document.getElementById('confetti-container');
+    let confettiTimeouts = [];
+
+    function showWinAnimation() {
+      clearWinAnimation();
+      const colors = ['#ff4757','#ff6b6b','#ffd32a','#2ed573','#1e90ff','#9b59b6'];
+      const pieces = 80;
+      for (let i = 0; i < pieces; i++) {
+        const el = document.createElement('div');
+        el.className = 'confetti-piece';
+        el.style.background = colors[Math.floor(Math.random() * colors.length)];
+        el.style.left = Math.random() * 100 + '%';
+        el.style.top = '-10%';
+        const delay = Math.random() * 500;
+        const duration = 2000 + Math.random() * 2000;
+        el.style.transform = `translateY(0) rotate(${Math.random()*360}deg)`;
+        confettiContainer.appendChild(el);
+
+        // Animate using requestAnimationFrame chain
+        const start = performance.now() + delay;
+        const end = start + duration;
+        const amplitude = 60 + Math.random() * 150;
+
+        function frame(now) {
+          if (now < start) {
+            requestAnimationFrame(frame);
+            return;
+          }
+          const t = Math.min(1, (now - start) / (end - start));
+          // vertical progress
+          el.style.top = (t * 110) + '%';
+          // horizontal wiggle
+          el.style.left = `calc(${parseFloat(el.style.left)}% + ${Math.sin(t * Math.PI * 4) * amplitude}px)`;
+          el.style.transform = `rotate(${t * 720}deg)`;
+          if (t < 1) requestAnimationFrame(frame);
+          else setTimeout(() => { try { el.remove(); } catch(e){} }, 3000);
+        }
+
+        const rafId = requestAnimationFrame(frame);
+        confettiTimeouts.push(rafId);
+      }
+
+      // Stop confetti after some time
+      const clearId = setTimeout(clearWinAnimation, 7000);
+      confettiTimeouts.push(clearId);
+    }
+
+    function clearWinAnimation() {
+      // cancel scheduled frames/timeouts
+      confettiTimeouts.forEach(id => { try { cancelAnimationFrame(id); } catch(e){} try { clearTimeout(id); } catch(e){} });
+      confettiTimeouts = [];
+      confettiContainer.innerHTML = '';
+    }
+
+    // Moderator dialog logic
+    const moderatorDialog = document.getElementById('moderator-dialog');
+    const moderatorText = document.getElementById('moderator-text');
+    const modConfirmBtn = document.getElementById('mod-confirm');
+    const modCancelBtn = document.getElementById('mod-cancel');
+  let pendingAnswerIndex = null;
+  let pendingButton = null;
+
+    function openModeratorConfirm(origIndex, clickedButton) {
+      // pokud už je dialog otevřený, ignoruj
+      const moderator = document.getElementById('moderator');
+      if (moderator.classList.contains('active')) return;
+
+      // uložíme pending index
+      pendingAnswerIndex = origIndex;
+      pendingButton = clickedButton;
+
+      // přizpůsobíme text (náhodně vybereme jednu z frází)
+      const phrases = [
+        'Je to vaše konečná odpověď?',
+        'To je vaše definitivní odpověď?',
+        'Chcete tuto odpověď potvrdit?',
+        'Jste si naprosto jistý?',
+        'Opravdu chcete odpovědět právě takto?',
+        'Chceš takhle odpovědět, smrade?',
+        'Jste si jistý?',
+        'Je toto vaše finální rozhodnutí?'
+      ];
+      moderatorText.textContent = phrases[Math.floor(Math.random() * phrases.length)];
+
+      // zobrazíme moderátora přes celou obrazovku
+      moderator.classList.add('active');
+      
+      // schovej malý avatar
+      const smallAvatar = document.getElementById('moderator-avatar-small');
+      if (smallAvatar) smallAvatar.classList.add('hidden');
+
+      // fokus na potvrdit
+      modConfirmBtn.focus();
+
+      // po otevření ztlumíme ostatní tlačítka
+      const allBtns = optionsEl.querySelectorAll('button.option');
+      allBtns.forEach(b => b.classList.add('blurred'));
+    }
+
+    function closeModeratorConfirm() {
+      const moderator = document.getElementById('moderator');
+      const smallAvatar = document.getElementById('moderator-avatar-small');
+      
+      pendingAnswerIndex = null;
+      pendingButton = null;
+      moderator.classList.remove('active');
+      
+      // zobraz malý avatar zpět
+      if (smallAvatar) smallAvatar.classList.remove('hidden');
+      
+      const allBtns = optionsEl.querySelectorAll('button.option');
+      allBtns.forEach(b => b.classList.remove('blurred'));
+    }
+
+    modCancelBtn.addEventListener('click', () => {
+      closeModeratorConfirm();
+    });
+
+    modConfirmBtn.addEventListener('click', () => {
+      if (pendingButton && pendingAnswerIndex !== null) {
+        // zavřeme dialog a potvrdíme odpověď
+        const idx = Number(pendingButton.dataset.idx);
+        closeModeratorConfirm();
+        selectAnswer(idx);
+      }
+    });
+
+    // Close moderator dialog when restarting
+    restartBtn.addEventListener('click', () => {
+      closeModeratorConfirm();
+    });
+  </script>
+
+</body>
+</html>
+

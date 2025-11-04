@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎯 Ve vývoji!</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      color: #f0f0f0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+    }
+
+    h1 {
+      font-size: 3rem;
+      margin-bottom: 20px;
+      color: #b565ff;
+      text-shadow: 0 0 20px #b565ff;
+      text-align: center;
+    }
+
+    .subtitle {
+      font-size: 1.2rem;
+      margin-bottom: 40px;
+      color: #bbb;
+      text-align: center;
+    }
+
+    .games-container {
+      background: rgba(20, 20, 30, 0.9);
+      padding: 50px 40px;
+      border-radius: 24px;
+      border: 2px solid #b565ff;
+      box-shadow: 0 0 40px rgba(181, 101, 255, 0.4);
+      max-width: 1000px;
+      width: 100%;
+    }
+
+    .games-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 25px;
+      margin-bottom: 30px;
+    }
+
+    .game-item {
+      background: rgba(40, 40, 60, 0.8);
+      padding: 30px 20px;
+      border-radius: 16px;
+      border: 2px solid #555;
+      text-align: center;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .game-item:hover {
+      transform: translateY(-5px);
+      border-color: #b565ff;
+      box-shadow: 0 5px 25px rgba(181, 101, 255, 0.5);
+      background: rgba(181, 101, 255, 0.2);
+    }
+
+    .game-item .icon {
+      font-size: 3.5rem;
+      margin-bottom: 15px;
+      display: block;
+    }
+
+    .game-item h3 {
+      font-size: 1.4rem;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+
+    .game-item .status {
+      font-size: 0.9rem;
+      color: #ffd700;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+
+    .game-item .price {
+      font-size: 1.1rem;
+      color: #ffd700;
+      font-weight: bold;
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+    }
+
+    .game-item.locked {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .game-item.locked:hover {
+      transform: none;
+      box-shadow: none;
+      background: rgba(40, 40, 60, 0.8);
+    }
+
+    .game-item.unlocked {
+      border-color: #00ff88;
+    }
+
+    .game-item.unlocked:hover {
+      border-color: #00ff88;
+      box-shadow: 0 5px 25px rgba(0, 255, 136, 0.5);
+      background: rgba(0, 255, 136, 0.2);
+    }
+
+    .coming-soon-badge {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #ff4444;
+      color: white;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: bold;
+    }
+
+    a.back-link {
+      display: inline-block;
+      margin-top: 30px;
+      color: #b565ff;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 1.1rem;
+      transition: all 0.3s ease;
+      text-align: center;
+    }
+
+    a.back-link:hover {
+      color: #fff;
+      text-shadow: 0 0 10px #b565ff;
+    }
+
+    .note {
+      text-align: center;
+      color: #888;
+      font-size: 0.95rem;
+      margin-top: 20px;
+      font-style: italic;
+    }
+
+    @media (max-width: 768px) {
+      .games-container {
+        padding: 30px 20px;
+      }
+
+      .games-grid {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 15px;
+      }
+
+      .game-item {
+        padding: 20px 15px;
+      }
+
+      .game-item .icon {
+        font-size: 2.5rem;
+      }
+
+      .game-item h3 {
+        font-size: 1.1rem;
+      }
+
+      h1 {
+        font-size: 2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🎯 Další hry</h1>
+  <p class="subtitle">Připravujeme pro tebe další retro klasiky!</p>
+
+  <div class="coin-display-container">
+    <span class="coin-icon">🪙</span>
+    <span id="coin-display">0</span>
+  </div>
+
+  <div class="games-container">
+    <div class="games-grid">
+
+      <div class="game-item locked" data-game="pacman" data-price="5000">
+        <span class="coming-soon-badge">🔒 Zamčeno</span>
+        <span class="icon">👾</span>
+        <h3>Pac-Man</h3>
+        <p class="price">🪙 5000</p>
+      </div>
+
+      <div class="game-item locked" data-game="minesweeper" data-price="5000">
+        <span class="coming-soon-badge">🔒 Zamčeno</span>
+        <span class="icon">💣</span>
+        <h3>Minesweeper</h3>
+        <p class="price">🪙 5000</p>
+      </div>
+
+      <div class="game-item locked" data-game="tetris" data-price="5000">
+        <span class="coming-soon-badge">🔒 Zamčeno</span>
+        <span class="icon">🟦</span>
+        <h3>Tetris</h3>
+        <p class="price">🪙 5000</p>
+      </div>
+
+      <div class="game-item locked" data-game="asteroids" data-price="5000">
+        <span class="coming-soon-badge">🔒 Zamčeno</span>
+        <span class="icon">🚀</span>
+        <h3>Asteroids</h3>
+        <p class="price">🪙 5000</p>
+      </div>
+
+      <div class="game-item locked" data-game="2048" data-price="5000">
+        <span class="coming-soon-badge">🔒 Zamčeno</span>
+        <span class="icon">🔢</span>
+        <h3>2048</h3>
+        <p class="price">🪙 5000</p>
+      </div>
+
+      <div class="game-item locked" data-game="dino" data-price="5000">
+        <span class="coming-soon-badge">🔒 Zamčeno</span>
+        <span class="icon">🦖</span>
+        <h3>Dino Game</h3>
+        <p class="price">🪙 5000</p>
+      </div>
+
+      <div class="game-item locked" data-game="frogger" data-price="5000">
+        <span class="coming-soon-badge">🔒 Zamčeno</span>
+        <span class="icon">🐸</span>
+        <h3>Frogger</h3>
+        <p class="price">🪙 5000</p>
+      </div>
+
+      <div class="game-item locked" data-game="chess" data-price="5000">
+        <span class="coming-soon-badge">🔒 Zamčeno</span>
+        <span class="icon">♟️</span>
+        <h3>Šachy</h3>
+        <p class="price">🪙 5000</p>
+      </div>
+
+    </div>
+
+    <p class="note">💡 Tyto hry můžeš odemknout za coiny! Získej coiny hraním ostatních her.</p>
+
+    <div style="text-align: center;">
+      <a href="og_gamezz_portal.html" class="back-link">← Zpět na portál</a>
+    </div>
+  </div>
+
+  <script src="coin-system.js"></script>
+  <script>
+    // Inicializace coin systému
+    CoinSystem.init();
+
+    // Kontrola odemčených her
+    const UNLOCKED_GAMES_KEY = 'gamezz_portal_unlocked_games';
+
+    function getUnlockedGames() {
+      const unlocked = localStorage.getItem(UNLOCKED_GAMES_KEY);
+      return unlocked ? JSON.parse(unlocked) : [];
+    }
+
+    function unlockGame(gameName) {
+      const unlocked = getUnlockedGames();
+      if (!unlocked.includes(gameName)) {
+        unlocked.push(gameName);
+        localStorage.setItem(UNLOCKED_GAMES_KEY, JSON.stringify(unlocked));
+      }
+    }
+
+    function isGameUnlocked(gameName) {
+      return getUnlockedGames().includes(gameName);
+    }
+
+    // Aktualizovat zobrazení her
+    function updateGameDisplay() {
+      const gameItems = document.querySelectorAll('.game-item');
+      
+      gameItems.forEach(item => {
+        const gameName = item.dataset.game;
+        const price = parseInt(item.dataset.price);
+        const badge = item.querySelector('.coming-soon-badge');
+        
+        if (isGameUnlocked(gameName)) {
+          item.classList.remove('locked');
+          item.classList.add('unlocked');
+          badge.textContent = '✅ Odemčeno';
+          badge.style.background = '#00ff88';
+          item.style.cursor = 'default';
+        } else {
+          // Kliknutí na zamčenou hru
+          item.onclick = function() {
+            if (CoinSystem.hasEnoughCoins(price)) {
+              if (confirm(`Chceš odemknout ${item.querySelector('h3').textContent} za ${price} coinů?`)) {
+                if (CoinSystem.spendCoins(price)) {
+                  unlockGame(gameName);
+                  updateGameDisplay();
+                  alert(`🎉 Gratulujeme! ${item.querySelector('h3').textContent} byla odemčena!\n\n⚠️ Hra je zatím ve vývoji, ale je odemčena pro budoucí hraní.`);
+                }
+              }
+            } else {
+              alert(`Nemáš dostatek coinů! Potřebuješ ${price} coinů, ale máš pouze ${CoinSystem.getCoins()} coinů.\n\n💡 Získej více coinů hraním her!`);
+            }
+          };
+        }
+      });
+    }
+
+    // Inicializace
+    updateGameDisplay();
+  </script>
+
+</body>
+</html>

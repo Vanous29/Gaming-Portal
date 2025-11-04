@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>⭕ ❌ Tic-Tac-Toe</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      color: #f0f0f0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 20px;
+      color: #ff3b6d;
+      text-shadow: 0 0 15px #ff3b6d;
+    }
+
+    .game-container {
+      background: rgba(20, 20, 30, 0.9);
+      padding: 30px;
+      border-radius: 16px;
+      border: 2px solid #ff3b6d;
+      box-shadow: 0 0 30px rgba(255, 59, 109, 0.3);
+      text-align: center;
+    }
+
+    .game-board {
+      display: grid;
+      grid-template-columns: repeat(3, 120px);
+      grid-template-rows: repeat(3, 120px);
+      gap: 10px;
+      margin: 20px auto;
+      background: #1a1a2e;
+      padding: 10px;
+      border-radius: 12px;
+      border: 2px solid #ff3b6d;
+    }
+
+    .cell {
+      background: #2a2a3e;
+      border: 2px solid #ff3b6d;
+      border-radius: 8px;
+      font-size: 3rem;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      color: #ff3b6d;
+      text-shadow: 0 0 10px #ff3b6d;
+    }
+
+    .cell:hover:not(.taken) {
+      background: rgba(255, 59, 109, 0.2);
+      transform: scale(1.05);
+      box-shadow: 0 0 15px rgba(255, 59, 109, 0.5);
+    }
+
+    .cell.taken {
+      cursor: not-allowed;
+    }
+
+    .cell.x {
+      color: #ff3b6d;
+      text-shadow: 0 0 15px #ff3b6d;
+    }
+
+    .cell.o {
+      color: #00d4ff;
+      text-shadow: 0 0 15px #00d4ff;
+    }
+
+    .info {
+      margin: 20px 0;
+      font-size: 1.3rem;
+      color: #ff3b6d;
+      font-weight: bold;
+      min-height: 40px;
+    }
+
+    .controls {
+      margin: 20px 0;
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    button {
+      background: #222;
+      border: 2px solid #ff3b6d;
+      border-radius: 8px;
+      color: #ff3b6d;
+      font-weight: bold;
+      padding: 12px 24px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    button:hover {
+      background: #ff3b6d;
+      color: #222;
+      transform: scale(1.05);
+      box-shadow: 0 0 15px rgba(255, 59, 109, 0.8);
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .mode-selector {
+      margin-bottom: 15px;
+    }
+
+    .mode-selector button {
+      padding: 8px 16px;
+      font-size: 0.9rem;
+    }
+
+    .mode-selector button.active {
+      background: #ff3b6d;
+      color: #222;
+    }
+
+    .instructions {
+      margin-top: 20px;
+      color: #aaa;
+      font-size: 0.9rem;
+    }
+
+    a.back-link {
+      display: inline-block;
+      margin-top: 20px;
+      color: #ff3b6d;
+      text-decoration: none;
+      font-weight: bold;
+      transition: color 0.3s ease;
+    }
+
+    a.back-link:hover {
+      color: #fff;
+      text-shadow: 0 0 10px #ff3b6d;
+    }
+
+    .winner-line {
+      position: absolute;
+      background: #ff3b6d;
+      box-shadow: 0 0 20px #ff3b6d;
+      z-index: 10;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>⭕ ❌ Tic-Tac-Toe</h1>
+
+  <div class="game-container">
+    <div class="mode-selector">
+      <button id="mode-ai" class="active">vs AI</button>
+      <button id="mode-2p">2 Players</button>
+    </div>
+
+    <div class="info" id="game-info">Your turn! (❌)</div>
+
+    <div class="game-board" id="game-board">
+      <div class="cell" data-index="0"></div>
+      <div class="cell" data-index="1"></div>
+      <div class="cell" data-index="2"></div>
+      <div class="cell" data-index="3"></div>
+      <div class="cell" data-index="4"></div>
+      <div class="cell" data-index="5"></div>
+      <div class="cell" data-index="6"></div>
+      <div class="cell" data-index="7"></div>
+      <div class="cell" data-index="8"></div>
+    </div>
+
+    <div class="controls">
+      <button id="restart-btn">New Game</button>
+    </div>
+
+    <div class="instructions">
+      <p id="controls-text">🎮 Click on a square to place ❌ | 🤖 AI plays as ⭕</p>
+    </div>
+
+    <a href="og_gamezz_portal.html" class="back-link">← Back to portal</a>
+  </div>
+
+  <script src="coin-system.js"></script>
+  <script>
+    const cells = document.querySelectorAll('.cell');
+    const gameInfo = document.getElementById('game-info');
+    const restartBtn = document.getElementById('restart-btn');
+    const modeAiBtn = document.getElementById('mode-ai');
+    const mode2pBtn = document.getElementById('mode-2p');
+    const controlsText = document.getElementById('controls-text');
+
+    let board = ['', '', '', '', '', '', '', '', ''];
+    let currentPlayer = 'X';
+    let isAiMode = true;
+    let gameActive = true;
+
+    const winningConditions = [
+      [0, 1, 2], // Top row
+      [3, 4, 5], // Middle row
+      [6, 7, 8], // Bottom row
+      [0, 3, 6], // Left column
+      [1, 4, 7], // Middle column
+      [2, 5, 8], // Right column
+      [0, 4, 8], // Diagonal \
+      [2, 4, 6]  // Diagonal /
+    ];
+
+    function handleCellClick(e) {
+      const cell = e.target;
+      const index = parseInt(cell.getAttribute('data-index'));
+
+      if (board[index] !== '' || !gameActive) {
+        return;
+      }
+
+      // Player move
+      makeMove(index, currentPlayer);
+
+      // Check for win or draw
+      if (checkWin()) {
+        endGame(false);
+        return;
+      }
+
+      if (checkDraw()) {
+        endGame(true);
+        return;
+      }
+
+      // Switch player
+      currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+      updateInfo();
+
+      // AI move
+      if (isAiMode && currentPlayer === 'O' && gameActive) {
+        setTimeout(() => {
+          makeAiMove();
+          
+          if (checkWin()) {
+            endGame(false);
+            return;
+          }
+
+          if (checkDraw()) {
+            endGame(true);
+            return;
+          }
+
+          currentPlayer = 'X';
+          updateInfo();
+        }, 500);
+      }
+    }
+
+    function makeMove(index, player) {
+      board[index] = player;
+      cells[index].textContent = player === 'X' ? '❌' : '⭕';
+      cells[index].classList.add('taken', player.toLowerCase());
+    }
+
+    function makeAiMove() {
+      // Simple AI: Try to win, block player, or take random
+      let move = findBestMove('O'); // Try to win
+      if (move === -1) {
+        move = findBestMove('X'); // Block player
+      }
+      if (move === -1) {
+        move = getRandomMove(); // Random move
+      }
+
+      if (move !== -1) {
+        makeMove(move, 'O');
+      }
+    }
+
+    function findBestMove(player) {
+      for (let condition of winningConditions) {
+        const [a, b, c] = condition;
+        const line = [board[a], board[b], board[c]];
+        const emptyIndex = line.indexOf('');
+        
+        if (emptyIndex !== -1 && line.filter(cell => cell === player).length === 2) {
+          return condition[emptyIndex];
+        }
+      }
+      return -1;
+    }
+
+    function getRandomMove() {
+      const availableMoves = board.map((cell, index) => cell === '' ? index : null).filter(val => val !== null);
+      if (availableMoves.length === 0) return -1;
+      return availableMoves[Math.floor(Math.random() * availableMoves.length)];
+    }
+
+    function checkWin() {
+      for (let condition of winningConditions) {
+        const [a, b, c] = condition;
+        if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+          highlightWinningCells([a, b, c]);
+          return true;
+        }
+      }
+      return false;
+    }
+
+    function checkDraw() {
+      return board.every(cell => cell !== '');
+    }
+
+    function highlightWinningCells(indices) {
+      indices.forEach(index => {
+        cells[index].style.background = 'rgba(255, 59, 109, 0.4)';
+      });
+    }
+
+    function updateInfo() {
+      if (!gameActive) return;
+
+      if (isAiMode) {
+        gameInfo.textContent = currentPlayer === 'X' ? 'Your turn! (❌)' : 'AI is thinking... (⭕)';
+      } else {
+        gameInfo.textContent = `Player ${currentPlayer === 'X' ? '1' : '2'} turn (${currentPlayer === 'X' ? '❌' : '⭕'})`;
+      }
+    }
+
+    function endGame(isDraw) {
+      gameActive = false;
+      
+      if (isDraw) {
+        gameInfo.textContent = 'Draw! 🤝';
+      } else {
+        if (isAiMode) {
+          gameInfo.textContent = currentPlayer === 'X' ? 'You won! 🎉' : 'AI won! 🤖';
+          // Coin reward: 300 coins for winning against AI
+          if (currentPlayer === 'X' && typeof CoinSystem !== 'undefined') {
+            CoinSystem.addCoins(300);
+          }
+        } else {
+          gameInfo.textContent = `Player ${currentPlayer === 'X' ? '1' : '2'} won! 🎉`;
+          // Coin reward: 300 coins for winning
+          if (typeof CoinSystem !== 'undefined') {
+            CoinSystem.addCoins(300);
+          }
+        }
+      }
+    }
+
+    function restartGame() {
+      board = ['', '', '', '', '', '', '', '', ''];
+      currentPlayer = 'X';
+      gameActive = true;
+
+      cells.forEach(cell => {
+        cell.textContent = '';
+        cell.classList.remove('taken', 'x', 'o');
+        cell.style.background = '';
+      });
+
+      updateInfo();
+    }
+
+    // Mode switching
+    modeAiBtn.addEventListener('click', () => {
+      isAiMode = true;
+      modeAiBtn.classList.add('active');
+      mode2pBtn.classList.remove('active');
+      controlsText.innerHTML = '🎮 Click on a square to place ❌ | 🤖 AI plays as ⭕';
+      restartGame();
+    });
+
+    mode2pBtn.addEventListener('click', () => {
+      isAiMode = false;
+      mode2pBtn.classList.add('active');
+      modeAiBtn.classList.remove('active');
+      controlsText.innerHTML = '🎮 Player 1: ❌ | 🎮 Player 2: ⭕ | 🎯 Click squares alternately';
+      restartGame();
+    });
+
+    // Event listeners
+    cells.forEach(cell => cell.addEventListener('click', handleCellClick));
+    restartBtn.addEventListener('click', restartGame);
+
+    // Initialize
+    updateInfo();
+  </script>
+
+</body>
+</html>

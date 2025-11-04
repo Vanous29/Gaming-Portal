@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>🎮 Gaming Portal</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      color: #f0f0f0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
+    }
+
+    h1 {
+      font-size: 3rem;
+      margin-bottom: 20px;
+      color: #ff6b6b;
+      text-shadow: 0 0 20px #ff6b6b;
+      animation: glow 2s ease-in-out infinite alternate;
+    }
+
+    @keyframes glow {
+      from { text-shadow: 0 0 10px #ff6b6b, 0 0 20px #ff6b6b; }
+      to { text-shadow: 0 0 20px #ff6b6b, 0 0 40px #ff6b6b, 0 0 60px #ff6b6b; }
+    }
+
+    .subtitle {
+      font-size: 1.2rem;
+      margin-bottom: 50px;
+      color: #bbb;
+    }
+
+    .game-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 30px;
+      max-width: 1200px;
+      width: 100%;
+    }
+
+    .game-card {
+      background: rgba(20, 20, 30, 0.85);
+      padding: 40px 30px;
+      border-radius: 16px;
+      border: 2px solid #555;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .game-card::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      background: var(--glow-color, #888);
+      border-radius: 16px;
+      z-index: -1;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .game-card:hover {
+      transform: translateY(-10px) scale(1.03);
+      box-shadow: 0 10px 40px var(--glow-shadow);
+      border-color: var(--glow-color);
+    }
+
+    .game-card:hover::before {
+      opacity: 1;
+    }
+
+    .game-card:hover .game-card-content {
+      background: var(--glow-color);
+      border-radius: 12px;
+      padding: 5px;
+    }
+
+    .game-card:hover h2,
+    .game-card:hover p {
+      color: #000 !important;
+      text-shadow: none;
+    }
+
+    /* Signature colors for each game */
+    .game-card.snake {
+      --glow-color: #00ff88;
+      --glow-shadow: rgba(0, 255, 136, 0.5);
+    }
+
+    .game-card.flappy {
+      --glow-color: #ff9500;
+      --glow-shadow: rgba(255, 149, 0, 0.5);
+    }
+
+    .game-card.pong {
+      --glow-color: #00d4ff;
+      --glow-shadow: rgba(0, 212, 255, 0.5);
+    }
+
+    .game-card.piskvorky {
+      --glow-color: #ff3b6d;
+      --glow-shadow: rgba(255, 59, 109, 0.5);
+    }
+
+    .game-card.millionaire {
+      --glow-color: #ffd700;
+      --glow-shadow: rgba(255, 215, 0, 0.5);
+    }
+
+    .game-card.arkanoid {
+      --glow-color: #00ffff;
+      --glow-shadow: rgba(0, 255, 255, 0.5);
+    }
+
+    .game-card.pacman {
+      --glow-color: #ffff00;
+      --glow-shadow: rgba(255, 255, 0, 0.5);
+    }
+
+    .game-card.more {
+      --glow-color: #b565ff;
+      --glow-shadow: rgba(181, 101, 255, 0.5);
+    }
+
+    .game-icon {
+      font-size: 4rem;
+      margin-bottom: 15px;
+      display: block;
+    }
+
+    .game-card h2 {
+      font-size: 1.8rem;
+      margin-bottom: 10px;
+      color: #fff;
+      transition: color 0.3s ease;
+    }
+
+    .game-card p {
+      font-size: 1rem;
+      color: #ccc;
+      line-height: 1.5;
+      transition: color 0.3s ease;
+    }
+
+    .game-card-content {
+      transition: all 0.3s ease;
+      position: relative;
+      z-index: 1;
+    }
+
+    .game-card a {
+      color: inherit;
+      text-decoration: none;
+      display: block;
+    }
+
+    footer {
+      margin-top: 60px;
+      font-size: 0.9rem;
+      color: #888;
+    }
+
+    .coming-soon {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .coming-soon:hover {
+      transform: none;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .coming-soon::before {
+      opacity: 0 !important;
+    }
+
+    .badge {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background: #ff4444;
+      color: white;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: bold;
+    }
+
+    .badge.new {
+      background: #00ff88;
+      color: #111;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="coin-display-container">
+    <span class="coin-icon">🪙</span>
+    <span id="coin-display">0</span>
+  </div>
+
+  <h1>🎮 Game Portal</h1>
+  <p class="subtitle">Choose a game and start playing!</p>
+
+  <div class="game-grid">
+    
+    <div class="game-card snake">
+      <a href="snake.html">
+        <div class="game-card-content">
+          <span class="badge new">New</span>
+          <span class="game-icon">🐍</span>
+          <h2>Snake</h2>
+          <p>Classic snake. Eat food and grow, but don't hit yourself!</p>
+        </div>
+      </a>
+    </div>
+
+    <div class="game-card flappy">
+      <a href="flappy-bird.html">
+        <div class="game-card-content">
+          <span class="badge new">New</span>
+          <span class="game-icon">🐦</span>
+          <h2>Flappy Bird</h2>
+          <p>Fly between obstacles and set a new record!</p>
+        </div>
+      </a>
+    </div>
+
+    <div class="game-card pong">
+      <a href="pong.html">
+        <div class="game-card-content">
+          <span class="badge">New</span>
+          <span class="game-icon">▐ ⚪ ▌</span>
+          <h2>Pong</h2>
+          <p>Classic pong for one or two players.</p>
+        </div>
+      </a>
+    </div>
+
+    <div class="game-card piskvorky">
+      <a href="piskvorky.html">
+        <div class="game-card-content">
+          <span class="badge new">New</span>
+          <span class="game-icon">⭕ ❌</span>
+          <h2>Tic-Tac-Toe</h2>
+          <p>3 in a row. Play against computer or a friend!</p>
+        </div>
+      </a>
+    </div>
+
+    <div class="game-card millionaire">
+      <a href="millionaire.html">
+        <div class="game-card-content">
+          <span class="badge new">New</span>
+          <span class="game-icon">💰</span>
+          <h2>Milionář &#127464;&#127487;</h2>
+          <p>Chceš být milionářem? Odpověz na 15 otázek a vyhraj!</p>
+        </div>
+      </a>
+    </div>
+
+    <div class="game-card arkanoid">
+      <a href="arkanoid.html">
+        <div class="game-card-content">
+          <span class="badge new">New</span>
+          <span class="game-icon">🧱</span>
+          <h2>Arkanoid</h2>
+          <p>Break blocks, collect power-ups and go as far as you can!</p>
+        </div>
+      </a>
+    </div>
+
+    <div class="game-card pacman">
+      <a href="pacman.html">
+        <div class="game-card-content">
+          <span class="badge new">New</span>
+          <span class="game-icon">🟡</span>
+          <h2>Pac-Man</h2>
+          <p>Eat all the dots and avoid the ghosts!</p>
+        </div>
+      </a>
+    </div>
+
+    <div class="game-card more">
+      <a href="dalsi-hry.html">
+        <div class="game-card-content">
+          <span class="game-icon">🎯</span>
+          <h2>In Development!</h2>
+          <p>More fun retro games coming soon!</p>
+        </div>
+      </a>
+    </div>
+
+  </div>
+
+  <footer>
+    &copy; Vaňura s.r.o. 2025 | Made with ❤️
+  </footer>
+
+  <script src="coin-system.js"></script>
+  <script>
+    // Inicializace coin systému
+    CoinSystem.init();
+  </script>
+
+</body>
+</html>

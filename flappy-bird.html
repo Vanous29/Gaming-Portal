@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🐦 Flappy Bird</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      color: #f0f0f0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 10px;
+      overflow-y: auto;
+    }
+
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 15px;
+      color: #ff9500;
+      text-shadow: 0 0 15px #ff9500;
+    }
+
+    .game-container {
+      background: rgba(20, 20, 30, 0.9);
+      padding: 20px;
+      border-radius: 16px;
+      border: 2px solid #ff9500;
+      box-shadow: 0 0 30px rgba(255, 149, 0, 0.3);
+      text-align: center;
+      max-width: 100%;
+      margin: auto;
+    }
+
+    @media (max-height: 800px) {
+      body {
+        justify-content: flex-start;
+        padding: 5px;
+      }
+      
+      h1 {
+        font-size: 1.8rem;
+        margin-bottom: 10px;
+      }
+      
+      .game-container {
+        padding: 15px;
+      }
+      
+      canvas {
+        transform: scale(0.85);
+        transform-origin: center top;
+      }
+    }
+
+    @media (max-height: 700px) {
+      h1 {
+        font-size: 1.5rem;
+        margin-bottom: 5px;
+      }
+      
+      canvas {
+        transform: scale(0.7);
+      }
+      
+      .game-container {
+        padding: 10px;
+      }
+      
+      .info {
+        font-size: 1rem !important;
+        gap: 20px !important;
+        margin-bottom: 10px !important;
+      }
+    }
+
+    canvas {
+      border: 2px solid #ff9500;
+      background: linear-gradient(180deg, #87CEEB 0%, #E0F6FF 100%);
+      display: block;
+      margin: 15px auto;
+      box-shadow: 0 0 20px rgba(255, 149, 0, 0.5);
+    }
+
+    .controls {
+      margin: 15px 0;
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    button {
+      background: #222;
+      border: 2px solid #ff9500;
+      border-radius: 8px;
+      color: #ff9500;
+      font-weight: bold;
+      padding: 12px 24px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    button:hover {
+      background: #ff9500;
+      color: #222;
+      transform: scale(1.05);
+      box-shadow: 0 0 15px rgba(255, 149, 0, 0.8);
+    }
+
+    .info {
+      display: flex;
+      gap: 40px;
+      justify-content: center;
+      margin-bottom: 10px;
+      font-size: 1rem;
+    }
+
+    .score, .high-score {
+      color: #ff9500;
+      font-weight: bold;
+    }
+
+    .instructions {
+      margin-top: 15px;
+      color: #aaa;
+      font-size: 0.85rem;
+    }
+
+    a.back-link {
+      display: inline-block;
+      margin-top: 15px;
+      color: #ff9500;
+      text-decoration: none;
+      font-weight: bold;
+      transition: color 0.3s ease;
+    }
+
+    a.back-link:hover {
+      color: #fff;
+      text-shadow: 0 0 10px #ff9500;
+    }
+
+    .game-over {
+      color: #ff4444;
+      font-size: 1.3rem;
+      font-weight: bold;
+      margin: 10px 0;
+      text-shadow: 0 0 10px #ff4444;
+    }
+
+    .ready {
+      color: #ff9500;
+      font-size: 1.1rem;
+      font-weight: bold;
+      margin: 10px 0;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🐦 Flappy Bird</h1>
+
+  <div class="game-container">
+    <div class="info">
+      <div>Score: <span class="score" id="score">0</span></div>
+      <div>Best: <span class="high-score" id="high-score">0</span></div>
+    </div>
+
+    <canvas id="game" width="320" height="480"></canvas>
+
+    <div id="ready-msg" class="ready" style="display:none;">Click or press SPACE to start!</div>
+    <div id="game-over" class="game-over" style="display:none;">Game Over!</div>
+
+    <div class="controls">
+      <button id="restart-btn">Restart</button>
+    </div>
+
+    <div class="instructions">
+      <p>🎮 Controls: Mouse click, SPACE or arrow up | 🚀 Fly between pipes | ⚠️ Don't crash!</p>
+    </div>
+
+    <a href="og_gamezz_portal.html" class="back-link">← Back to portal</a>
+  </div>
+  
+  <script src="coin-system.js"></script>
+  <script>
+    const canvas = document.getElementById('game');
+    const ctx = canvas.getContext('2d');
+    const scoreEl = document.getElementById('score');
+    const highScoreEl = document.getElementById('high-score');
+    const gameOverEl = document.getElementById('game-over');
+    const readyEl = document.getElementById('ready-msg');
+    const restartBtn = document.getElementById('restart-btn');
+
+    let highScore = localStorage.getItem('flappyHighScore') || 0;
+    highScoreEl.textContent = highScore;
+
+    // Game variables
+    let bird = { x: 48, y: 240, w: 34, h: 24, vy: 0 };
+    let gravity = 0.15;
+    let jump = -5;
+    let pipes = [];
+    let pipeGap = 150;
+    let pipeWidth = 50;
+    let baseSpeed = 1.2; // Začíná pomaleji
+    let pipeSpeed = baseSpeed;
+    let maxSpeed = 2.5; // Maximální rychlost (not impossible)
+    let speedIncrease = 0.15; // Zvýšení rychlosti každých 5 trubek
+    let score = 0;
+    let gameRunning = false;
+    let gameStarted = false;
+
+    function resetGame() {
+      bird.y = 240;
+      bird.vy = 0;
+      pipes = [];
+      score = 0;
+      pipeSpeed = baseSpeed; // Reset rychlosti
+      gameRunning = false;
+      gameStarted = false;
+      scoreEl.textContent = '0';
+      gameOverEl.style.display = 'none';
+      readyEl.style.display = 'none';
+      draw();
+    }
+
+    function drawBird() {
+      ctx.save();
+      
+      // Rotace ptáčka podle rychlosti
+      const rotation = Math.min(Math.max(bird.vy * 3, -30), 90) * Math.PI / 180;
+      ctx.translate(bird.x, bird.y);
+      ctx.rotate(rotation);
+      
+      // Tělo ptáčka (žluté)
+      ctx.fillStyle = '#FFD700';
+      ctx.beginPath();
+      ctx.ellipse(0, 0, bird.w/2, bird.h/2, 0, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Obrys těla
+      ctx.strokeStyle = '#FFA500';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      
+      // Bílá skvrna na břiše
+      ctx.fillStyle = '#FFF8DC';
+      ctx.beginPath();
+      ctx.ellipse(-2, 2, bird.w/3, bird.h/3, 0, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Oko - bílá část
+      ctx.fillStyle = '#fff';
+      ctx.beginPath();
+      ctx.arc(8, -4, 6, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Oko - černá zornice
+      ctx.fillStyle = '#000';
+      ctx.beginPath();
+      ctx.arc(10, -4, 3, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Bílý odlesk v oku
+      ctx.fillStyle = '#fff';
+      ctx.beginPath();
+      ctx.arc(11, -5, 1.5, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Zobák - horní část
+      ctx.fillStyle = '#FF8C00';
+      ctx.beginPath();
+      ctx.moveTo(bird.w/2, -2);
+      ctx.lineTo(bird.w/2 + 10, -4);
+      ctx.lineTo(bird.w/2 + 10, 0);
+      ctx.closePath();
+      ctx.fill();
+      
+      // Zobák - spodní část
+      ctx.beginPath();
+      ctx.moveTo(bird.w/2, 2);
+      ctx.lineTo(bird.w/2 + 10, 0);
+      ctx.lineTo(bird.w/2 + 10, 4);
+      ctx.closePath();
+      ctx.fill();
+      
+      // Zobák obrys
+      ctx.strokeStyle = '#D2691E';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(bird.w/2, -2);
+      ctx.lineTo(bird.w/2 + 10, -4);
+      ctx.lineTo(bird.w/2 + 10, 4);
+      ctx.lineTo(bird.w/2, 2);
+      ctx.stroke();
+      
+      // Křídlo (animované podle času)
+      const wingFlap = Math.sin(Date.now() / 100) * 5;
+      ctx.fillStyle = '#FFB347';
+      ctx.beginPath();
+      ctx.ellipse(-5, 5 + wingFlap, 10, 8, -20 * Math.PI / 180, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#FFA500';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      
+      // Detaily na křídle
+      ctx.strokeStyle = '#FF8C00';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(-8, 3 + wingFlap);
+      ctx.lineTo(-12, 8 + wingFlap);
+      ctx.stroke();
+      
+      ctx.restore();
+    }
+
+    function drawPipes() {
+      pipes.forEach(pipe => {
+        // Zelená barva truběk jako ve Flappy Bird
+        const pipeGreen = '#5CBF3C';
+        const pipeDarkGreen = '#3A9B2C';
+        const pipeHighlight = '#7FD65A';
+        
+        // Horní trubka - hlavní část
+        ctx.fillStyle = pipeGreen;
+        ctx.fillRect(pipe.x, 0, pipeWidth, pipe.top - 25);
+        
+        // Horní trubka - okraj (širší část dole)
+        ctx.fillStyle = pipeDarkGreen;
+        ctx.fillRect(pipe.x - 3, pipe.top - 25, pipeWidth + 6, 25);
+        
+        // Horní trubka - světlé ohraničení okraje
+        ctx.fillStyle = pipeHighlight;
+        ctx.fillRect(pipe.x - 3, pipe.top - 25, pipeWidth + 6, 3);
+        
+        // Spodní trubka - hlavní část
+        ctx.fillStyle = pipeGreen;
+        ctx.fillRect(pipe.x, pipe.top + pipeGap + 25, pipeWidth, canvas.height - pipe.top - pipeGap - 25 - 40);
+        
+        // Spodní trubka - okraj (širší část nahoře)
+        ctx.fillStyle = pipeDarkGreen;
+        ctx.fillRect(pipe.x - 3, pipe.top + pipeGap, pipeWidth + 6, 25);
+        
+        // Spodní trubka - světlé ohraničení okraje
+        ctx.fillStyle = pipeHighlight;
+        ctx.fillRect(pipe.x - 3, pipe.top + pipeGap, pipeWidth + 6, 3);
+        
+        // Detaily - vertikální linky na trubkách
+        ctx.strokeStyle = pipeDarkGreen;
+        ctx.lineWidth = 1;
+        
+        // Horní trubka vertikální čáry
+        for (let i = 0; i < 3; i++) {
+          const x = pipe.x + (i + 1) * (pipeWidth / 4);
+          ctx.beginPath();
+          ctx.moveTo(x, 0);
+          ctx.lineTo(x, pipe.top - 25);
+          ctx.stroke();
+        }
+        
+        // Spodní trubka vertikální čáry
+        for (let i = 0; i < 3; i++) {
+          const x = pipe.x + (i + 1) * (pipeWidth / 4);
+          ctx.beginPath();
+          ctx.moveTo(x, pipe.top + pipeGap + 25);
+          ctx.lineTo(x, canvas.height - 40);
+          ctx.stroke();
+        }
+        
+        // Světlý odlesk na levé straně truběk
+        ctx.fillStyle = 'rgba(127, 214, 90, 0.3)';
+        ctx.fillRect(pipe.x + 2, 0, 4, pipe.top - 25);
+        ctx.fillRect(pipe.x + 2, pipe.top + pipeGap + 25, 4, canvas.height - pipe.top - pipeGap - 25 - 40);
+        
+        // Tmavý stín na pravé straně truběk
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+        ctx.fillRect(pipe.x + pipeWidth - 3, 0, 3, pipe.top - 25);
+        ctx.fillRect(pipe.x + pipeWidth - 3, pipe.top + pipeGap + 25, 3, canvas.height - pipe.top - pipeGap - 25 - 40);
+      });
+    }
+
+    function drawGround() {
+      // Hnědá země s texturou
+      ctx.fillStyle = '#DEB887';
+      ctx.fillRect(0, canvas.height-40, canvas.width, 40);
+      
+      // Tmavší horní okraj
+      ctx.fillStyle = '#8B7355';
+      ctx.fillRect(0, canvas.height-40, canvas.width, 3);
+      
+      // Tráva efekt
+      ctx.fillStyle = '#9ACD32';
+      for (let i = 0; i < canvas.width; i += 8) {
+        ctx.fillRect(i, canvas.height-40, 4, 4);
+      }
+      
+      // Textura země - malé tečky
+      ctx.fillStyle = '#CD853F';
+      for (let i = 0; i < canvas.width; i += 15) {
+        for (let j = 0; j < 3; j++) {
+          ctx.fillRect(i + Math.random() * 10, canvas.height - 35 + j * 10, 2, 2);
+        }
+      }
+    }
+
+    function drawScore() {
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 32px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText(score, canvas.width / 2, 50);
+      ctx.strokeStyle = '#000';
+      ctx.lineWidth = 2;
+      ctx.strokeText(score, canvas.width / 2, 50);
+    }
+
+    function update() {
+      if (!gameRunning) return;
+      bird.vy += gravity;
+      bird.y += bird.vy;
+
+      // Add pipes
+      if (pipes.length === 0 || pipes[pipes.length-1].x < canvas.width - 250) {
+        let top = Math.random() * (canvas.height - pipeGap - 100) + 40;
+        pipes.push({ x: canvas.width, top });
+      }
+      // Move pipes
+      pipes.forEach(pipe => pipe.x -= pipeSpeed);
+      // Remove off-screen pipes
+      if (pipes.length && pipes[0].x < -pipeWidth) pipes.shift();
+
+      // Collision detection
+      for (let pipe of pipes) {
+        // Bird hits pipe
+        if (bird.x + bird.w/2 > pipe.x && bird.x - bird.w/2 < pipe.x + pipeWidth) {
+          if (bird.y - bird.h/2 < pipe.top || bird.y + bird.h/2 > pipe.top + pipeGap) {
+            endGame();
+          }
+        }
+        // Score
+        if (!pipe.scored && pipe.x + pipeWidth < bird.x - bird.w/2) {
+          score++;
+          pipe.scored = true;
+          scoreEl.textContent = score;
+          
+          // Coin reward: 100 coinů za každý projitý sloup
+          if (typeof CoinSystem !== 'undefined') {
+            CoinSystem.addCoins(100);
+          }
+          
+          // Zrychlení každých 5 bodů
+          if (score % 5 === 0 && pipeSpeed < maxSpeed) {
+            pipeSpeed = Math.min(pipeSpeed + speedIncrease, maxSpeed);
+          }
+          
+          if (score > highScore) {
+            highScore = score;
+            highScoreEl.textContent = highScore;
+            localStorage.setItem('flappyHighScore', highScore);
+          }
+        }
+      }
+      // Bird hits ground or goes above screen
+      if (bird.y + bird.h/2 > canvas.height-40 || bird.y - bird.h/2 < 0) {
+        endGame();
+      }
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawGround();
+      drawPipes();
+      drawBird();
+      
+      if (!gameStarted) {
+        // Úvodní obrazovka
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height - 40);
+        
+        // Hlavní nadpis "Flappy Bird"
+        ctx.fillStyle = '#fff';
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 4;
+        ctx.font = 'bold 40px Arial';
+        ctx.textAlign = 'center';
+        ctx.strokeText('Flappy Bird', canvas.width / 2, canvas.height / 2 - 30);
+        ctx.fillText('Flappy Bird', canvas.width / 2, canvas.height / 2 - 30);
+        
+        // Podnadpis "PRESS TO START"
+        ctx.font = 'bold 20px Arial';
+        ctx.lineWidth = 3;
+        
+        // Blikání textu
+        const blink = Math.floor(Date.now() / 500) % 2;
+        if (blink) {
+          ctx.strokeText('PRESS TO START', canvas.width / 2, canvas.height / 2 + 20);
+          ctx.fillText('PRESS TO START', canvas.width / 2, canvas.height / 2 + 20);
+        }
+      } else {
+        drawScore();
+      }
+    }
+
+    function loop() {
+      update();
+      draw();
+      requestAnimationFrame(loop);
+    }
+
+    function flap() {
+      if (!gameStarted) {
+        gameStarted = true;
+        gameRunning = true;
+        readyEl.style.display = 'none';
+      }
+      if (gameRunning) {
+        bird.vy = jump;
+      }
+    }
+
+    function endGame() {
+      gameRunning = false;
+      gameOverEl.style.display = 'block';
+    }
+
+    document.addEventListener('keydown', e => {
+      if (e.code === 'Space' || e.code === 'ArrowUp') {
+        e.preventDefault();
+        flap();
+      }
+    });
+    canvas.addEventListener('mousedown', flap);
+    canvas.addEventListener('touchstart', flap);
+
+    restartBtn.addEventListener('click', resetGame);
+
+    resetGame();
+    loop();
+  </script>
+</body>
+</html>
